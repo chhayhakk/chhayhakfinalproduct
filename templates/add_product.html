@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap"
+    rel="stylesheet">
+
+  <title>Sixteen Clothing Products</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!--
+
+TemplateMo 546 Sixteen Clothing
+
+https://templatemo.com/tm-546-sixteen-clothing
+
+-->
+
+  <!-- Additional CSS Files -->
+  <link rel="stylesheet" href="static/assets/css/fontawesome.css">
+  <link rel="stylesheet" href="static/assets/css/templatemo-sixteen.css">
+  <link rel="stylesheet" href="static/assets/css/owl.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    #image-preview,
+    #image-preview-edit {
+      cursor: pointer;
+      max-width: 600px;
+      max-height: 600px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0, 0, 0);
+      background-color: rgba(0, 0, 0, 0.4);
+      padding-top: 60px;
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+    }
+
+    .swal2-actions-custom {
+      display: flex;
+      justify-content: space-between;
+      width: 70%;
+    }
+
+    .swal2-confirm-custom {
+      margin-right: 1em;
+      background-color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="cropper-modal" class="modal">
+    <div class="modal-content">
+      <!-- <span id="close-modal" style="cursor:pointer">&times;</span> -->
+      <div>
+        <img id="cropper-image" style="max-width: 100%;">
+      </div>
+      <div class="d-flex justify-content-between mt-2">
+        <button id="crop-button" class="btn btn-primary">Crop</button>
+        <button id="close-modal" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+
+        <div class="table-responsive">
+          <table id="myTable" class="display table-striped">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Product Name</th>
+                <th>Image</th>
+                <th>Cost</th>
+                <th>Price</th>
+                <th>Description</th>
+                <th>Action</th>
+
+              </tr>
+            </thead>
+            <tbody>
+              {% for product_lists in product_list %}
+              <tr>
+                <td>{{ product_lists['id'] }}</td>
+                <td>{{ product_lists['title'] }}</td>
+                <td><img src="static/crop/{{product_lists['image_path']}}" style="width: 25px; height:25px;"
+                    onerror="this.onerror=null; this.src='static/uploads/errpr.png';"></td>
+                <td>{{ product_lists['cost'] }}</td>
+                <td>{{ product_lists['price'] }}</td>
+                <td>{{ product_lists['description'].split()[:3] | join(' ') }}</td>
+                <td class="d-flex ">
+                  <div class="mr-2">
+
+                    <a class="btn btn-outline-info" href="/edit_product?id={{product_lists['id']}}">
+                      <i class="fa fa-edit"></i>
+
+                    </a>
+
+                  </div>
+                  <div>
+                    <form method="post" action="/delete_product">
+                      <input type="hidden" name="product_id" value="{{product_lists['id']}}">
+                      <button class="btn btn-outline-danger" type="submit" onclick="handleSubmit(event)">
+                        <i class="fa fa-trash"></i>
+
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+
+    </div>
+    <hr>
+    <div class="col-md-12">
+      <h3>Add Product</h3>
+      <form class="form-content" method="POST" action="/add_product" enctype="multipart/form-data">
+        <div style="margin-bottom: 15px; text-align: center;">
+          <label>
+            <input class="custom-file-input" type="file" style="display: none" name="image"
+              onchange="previewImage(event)">
+            <img src="static/uploads/no-photo.png" alt="Image Preview" style="cursor:pointer;" name="image"
+              id="image-preview">
+          </label>
+
+        </div>
+
+        <div class="mb-3">
+          <label for="title" class="form-label">Title</label>
+          <input type="text" class="form-control" id="title" name="title" placeholder="New Title">
+
+        </div>
+        <div class="mb-3">
+          <label for="price" class="form-label">Cost</label>
+          <input type="text" class="form-control" id="cost" name="cost">
+        </div>
+        <div class="mb-3">
+          <label for="price" class="form-label">Price</label>
+          <input type="text" class="form-control" id="price" name="price">
+        </div>
+
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <input type="text" class="form-control" id="description" name="description">
+        </div>
+        <input type="hidden" id="cropped-image-data" name="cropped_image_data">
+        <input type="hidden" id="original-image-data" name="original_image_data">
+        <input type="hidden" id="original-filename" name="original_filename">
+        <div class="d-flex justify-content-between">
+          <button type="submit" class="btn btn-primary" onclick="prepareSubmission()">Add</button>
+          <a href="/product" class="btn btn-secondary">Back</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+
+  <div class="products">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="filters">
+            <ul>
+              <li class="active" data-filter="*">All Products</li>
+              <li data-filter=".des">Featured</li>
+              <li data-filter=".dev">Flash Deals</li>
+              <li data-filter=".gra">Last Minute</li>
+            </ul>
+          </div>
+        </div>
+        <!-- {#         <div class="latest-products">#}
+{#      <div class="container">#}
+{#        <div class="row">#}
+{#          <div class="col-md-12">#}
+{#            <div class="section-heading">#}
+{#              <h2>All Products</h2>#}
+{##}
+{#            </div>#}
+{#          </div>#}
+{#            {% for item in product_list %}#}
+{#          <div class="col-md-4">#}
+{#            <div class="product-item">#}
+{#              <a href="#"><img src="{{ item.image }}" alt="" style="height: 160px; width: 160px; justify-content: center"></a>#}
+{#              <div class="down-content">#}
+{#                <a href="#"><h4 >{{ item.title.split()[:3] | join(' ') }}</h4></a>#}
+{#                <h6>${{item.price}}</h6>#}
+{#              <p>{{ item.description[:100] }}{% if item.description|length > 50 %}...{% endif %}</p>#}
+{##}
+{##}
+{#                <ul class="stars">#}
+{#                {% for i in range(item.rating.rate | int) %}#}
+{#                    <li><i class="fa fa-star"></i></li>#}
+{#                {% endfor %}#}
+{##}
+{#                {% if item.rating.rate % 1 != 0 %}#}
+{#                    <li><i class="fa fa-star-half-o"></i></li>#}
+{#                {% endif %}#}
+{##}
+{#                {% for i in range(5 - item.rating.rate | int - (1 if item.rating.rate % 1 != 0 else 0)) %}#}
+{#                    <li><i class="fa fa-star-o"></i></li>#}
+{#                {% endfor %}#}
+{#                </ul>#}
+{#                <a href="/review?id={{ item.id }}"><span>Reviews</span></a>#}
+{##}
+{#              </div>#}
+{#            </div>#}
+{#          </div>#}
+{#             {% endfor %}#}
+{##}
+{##}
+{##}
+{##}
+{##}
+{#        </div>#}
+{#      </div>#}
+{#    </div>#}
+{#        </div>#}
+      </div>
+    </div> -->
+
+
+        <footer>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="inner-content">
+                  <p>Copyright &copy; 2020 Sixteen Clothing Co., Ltd.
+
+                    - Design: <a rel="nofollow noopener" href="https://templatemo.com" target="_blank">TemplateMo</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
+
+
+        <!-- Bootstrap core JavaScript -->
+        <script src="static/vendor/jquery/jquery.min.js"></script>
+        <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+
+        <!-- Additional Scripts -->
+        <script src="static/assets/js/custom.js"></script>
+        <script src="static/assets/js/owl.js"></script>
+        <script src="static/assets/js/slick.js"></script>
+        <script src="static/assets/js/isotope.js"></script>
+        <script src="static/assets/js/accordions.js"></script>
+        <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+
+        <script>
+          $(document).ready(function () {
+            $('#myTable').DataTable();
+          });
+        </script>
+        <script language="text/Javascript">
+          cleared[0] = cleared[1] = cleared[2] = 0; //set a cleared flag for each field
+          function clearField(t) {                   //declaring the array outside of the
+            if (!cleared[t.id]) {                      // function makes it static and global
+              cleared[t.id] = 1;  // you could use true and false, but that's more typing
+              t.value = '';         // with more chance of typos
+              t.style.color = '#fff';
+            }
+          }
+        </script>
+        <script>
+          $(document).ready(function () {
+            $('#file-name-display').click(function () {
+              $('#image').click();
+            });
+          });
+
+          let cropper;
+          const preview = document.getElementById('image-preview');
+          const input = document.querySelector('.custom-file-input');
+          const modal = document.getElementById('cropper-modal');
+          const cropperImage = document.getElementById('cropper-image');
+          const closeModal = document.getElementById('close-modal');
+          const cropButton = document.getElementById('crop-button');
+          let originalFileName;
+          //image preview edit
+          function preImageEdit(event) {
+            var input = event.target;
+            var preview = document.getElementById('image-preview-edit');
+
+            var reader = new FileReader();
+            reader.onload = function () {
+              preview.src = reader.result;
+            };
+
+            reader.readAsDataURL(input.files[0]);
+          }
+          //previewImage after crop
+          function previewImage(event) {
+
+            var input = event.target;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+              cropperImage.src = e.target.result;
+              document.getElementById('image-preview').src = e.target.result;
+              modal.style.display = 'block';
+              originalFileName = input.files[0].name;
+              document.getElementById('original-filename').value = originalFileName;
+              if (cropper) {
+                cropper.destroy();
+              }
+              //
+              cropper = new Cropper(cropperImage, {
+                aspectRatio: 1.77,
+                viewMode: 1,
+              });
+            };
+            reader.readAsDataURL(input.files[0]);
+          }
+          // After crop
+          cropButton.addEventListener('click', () => {
+            const canvas = cropper.getCroppedCanvas();
+            preview.src = canvas.toDataURL();
+            modal.style.display = 'none';
+            document.getElementById('cropped-image-data').value = canvas.toDataURL('image/png');
+            if (cropper) {
+              cropper.destroy();
+            }
+            // const canvas = cropper.getCroppedCanvas();
+            // preview.src = canvas.toDataURL();
+            // modal.style.display = 'none';
+            // if (cropper) {
+            //   cropper.destroy();
+            // }
+          });
+
+
+          //Close modal
+          closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+            if (cropper) {
+              cropper.destroy();
+            }
+          });
+
+          //Allow user to click out of modal to exit
+          window.onclick = function (event) {
+            if (event.target === modal) {
+              modal.style.display = 'none';
+              if (cropper) {
+                cropper.destroy();
+              }
+            }
+          };
+
+          function prepareSubmission() {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              document.getElementById('original-image-data').value = e.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+        </script>
+        <script <script>
+          function handleSubmit(event) {
+            event.preventDefault();  // Prevent the default form submission behavior
+
+            const form = event.target.closest('form');  // Get the closest form element
+            const formData = new FormData(form);  // Create FormData object from the form
+
+            Swal.fire({
+              icon: 'warning',
+              title: 'Are you sure?',
+              text: 'Do you want to delete this product?',
+              showConfirmButton: true,
+              showCancelButton: true,
+              confirmButtonText: 'Yes',
+              cancelButtonText: 'Cancel',
+              customClass: {
+                actions: 'swal2-actions-custom',
+                confirmButton: 'swal2-confirm-custom',
+                cancelButton: 'swal2-cancel-custom'
+              }
+            }).then((result) => {
+              if (result.isConfirmed) {
+                fetch('/delete_product', {
+                  method: 'POST',
+                  body: formData,
+                  headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                  }
+                }).then(response => {
+                  if (response.ok) {
+                    // Redirect to add_product page
+                    window.location.href = '/add_product';
+                  } else {
+                    throw new Error('Network response was not ok.');
+                  }
+                })
+                  .catch(error => {
+                    Swal.fire('Error!', 'There was an issue deleting the product.', 'error');
+                  });
+              }
+            });
+          }
+
+        </script>
+
+
+
+</body>
+
+</html>

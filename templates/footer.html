@@ -1,0 +1,124 @@
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="inner-content">
+          <p>Copyright &copy; 2020 Sixteen Clothing Co., Ltd.
+
+            - Design: <a rel="nofollow noopener" href="https://templatemo.com" target="_blank">TemplateMo</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="static/vendor/jquery/jquery.min.js"></script>
+<script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+
+<!-- Additional Scripts -->
+<script src="static/assets/js/custom.js"></script>
+<script src="static/assets/js/owl.js"></script>
+<script src="static/assets/js/slick.js"></script>
+<script src="static/assets/js/isotope.js"></script>
+<script src="static/assets/js/accordions.js"></script>
+
+
+<script language="text/Javascript">
+  cleared[0] = cleared[1] = cleared[2] = 0; //set a cleared flag for each field
+  function clearField(t) {                   //declaring the array outside of the
+    if (!cleared[t.id]) {                      // function makes it static and global
+      cleared[t.id] = 1;  // you could use true and false, but that's more typing
+      t.value = '';         // with more chance of typos
+      t.style.color = '#fff';
+    }
+  }
+</script>
+<script>
+  $(document).ready(function () {
+    $('#file-name-display').click(function () {
+      $('#image').click();
+    });
+  });
+
+  let cropper;
+  const preview = document.getElementById('image-preview');
+  const input = document.querySelector('.custom-file-input');
+  const modal = document.getElementById('cropper-modal');
+  const cropperImage = document.getElementById('cropper-image');
+  const closeModal = document.getElementById('close-modal');
+  const cropButton = document.getElementById('crop-button');
+  //image preview edit
+  function preImageEdit(event) {
+    var input = event.target;
+    var preview = document.getElementById('image-preview-edit');
+
+    var reader = new FileReader();
+    reader.onload = function () {
+      preview.src = reader.result;
+    };
+
+    reader.readAsDataURL(input.files[0]);
+  }
+  //previewImage after crop
+  function previewImage(event) {
+
+    var input = event.target;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      cropperImage.src = e.target.result;
+      document.getElementById('image-preview').src = e.target.result;
+      originalFileName = input.files[0].name;
+      document.getElementById('original-filename').value = originalFileName;
+      modal.style.display = 'block';
+      if (cropper) {
+        cropper.destroy();
+      }
+      //
+      cropper = new Cropper(cropperImage, {
+        aspectRatio: 1.77,
+        viewMode: 1,
+      });
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+  //Close modal
+  closeModal.addEventListener('click', () => {
+    modal.style.display = 'none';
+    if (cropper) {
+      cropper.destroy();
+    }
+  });
+  // After crop
+  cropButton.addEventListener('click', () => {
+    const canvas = cropper.getCroppedCanvas();
+    preview.src = canvas.toDataURL();
+    modal.style.display = 'none';
+    document.getElementById('cropped-image-data').value = canvas.toDataURL('image/png');
+    if (cropper) {
+      cropper.destroy();
+    }
+    // const canvas = cropper.getCroppedCanvas();
+    // preview.src = canvas.toDataURL();
+    // modal.style.display = 'none';
+    // if (cropper) {
+    //   cropper.destroy();
+    // }
+  });
+  //Allow user to click out of modal to exit
+  window.onclick = function (event) {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+      if (cropper) {
+        cropper.destroy();
+      }
+    }
+  };
+  function prepareSubmission() {
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      document.getElementById('original-image-data').value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+</script>

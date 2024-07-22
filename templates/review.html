@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+
+    <title>Sixteen Clothing HTML Template</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<!--
+
+TemplateMo 546 Sixteen Clothing
+
+https://templatemo.com/tm-546-sixteen-clothing
+
+-->
+
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" href="static/assets/css/fontawesome.css">
+    <link rel="stylesheet" href="static/assets/css/templatemo-sixteen.css">
+    <link rel="stylesheet" href="static/assets/css/owl.css">
+
+
+  </head>
+<body>
+    <div id="preloader">
+            <div class="jumper">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    {% include "navbar.html" %}
+
+     <div class="banner header-text">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mt-4">
+                <div class="card">
+                    <img src="/static/crop/{{current_product.image_path}}" class="card-img-top" alt="Product Image" style="height: 400px;">
+                </div>
+            </div>
+        
+
+            <div class="col-md-8 col-sm-12">
+                <input type = "hidden" name="product_id" value="{{ current_product['id'] }}"></input>
+                <form>
+                    <div class="mt-md-4">
+                        <h4 class="text-left">{{ current_product['title'] }}</h4>
+                    </div>
+                   
+                    <div class="mt-md-4">
+                        <p class="text-left" style="font-size: 20px; font-weight: bold">${{ current_product['price'] }}</p>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-left">{{ current_product['description'] }}</p>
+                    </div>
+                    <hr>
+                    <div>
+                        <a target="_blank" href="/checkout?id={{ current_product['id'] }}" class="btn btn-success float-left" style="background-color:#717fe0 !important;">Check Out</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</body>
+    {% include "footer.html" %}
+</html>
